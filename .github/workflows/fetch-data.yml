@@ -1,13 +1,13 @@
-name: Fetch ECI Schedule Data
+name: Schedule Data
 
 on:
-  workflow_dispatch:  # Manual trigger from GitHub UI
+  workflow_dispatch:
   schedule:
-    - cron: '0 */6 * * *'  # Run every 6 hours
+    - cron: '0 */6 * * *'
 
 jobs:
   fetch-data:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted  # Changed from ubuntu-latest
     
     steps:
     - name: Checkout repository
@@ -25,7 +25,7 @@ jobs:
         
     - name: Fetch schedule data
       env:
-        BEARER_TOKEN: ${{ secrets.BEARER_TOKEN }}  # This should be JUST the token, not "Bearer ..."
+        BEARER_TOKEN: ${{ secrets.BEARER_TOKEN }}
       run: python fetch_schedule_data.py
       
     - name: Upload fetched data as artifact
@@ -34,6 +34,3 @@ jobs:
         name: eci-schedule-data
         path: schedule_data_*.json
         retention-days: 7
-        
-    - name: List generated files
-      run: ls -la *.json 2>/dev/null || echo "No JSON files found"
