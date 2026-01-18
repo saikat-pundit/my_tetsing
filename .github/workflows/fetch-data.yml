@@ -7,7 +7,7 @@ on:
 
 jobs:
   fetch-data:
-    runs-on: self-hosted  # Changed from ubuntu-latest
+    runs-on: ubuntu-latest
     
     steps:
     - name: Checkout repository
