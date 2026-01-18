@@ -1,7 +1,21 @@
+import os
 import requests
 import json
+from datetime import datetime
 
 def fetch_schedule_hearing_data():
+    """
+    Fetch schedule hearing data from ECI API
+    """
+    # Get bearer token from environment variable (GitHub Secret)
+    bearer_token = os.getenv('BEARER_TOKEN')
+    
+    if not bearer_token:
+        print("❌ Error: BEARER_TOKEN environment variable not set")
+        print("   For GitHub Actions: Add BEARER_TOKEN as a GitHub Secret")
+        print("   For local testing: export BEARER_TOKEN='your_token_here'")
+        return None
+    
     # API URL
     url = "https://gateway-officials.eci.gov.in/api/v1/s25/scheduleHearing/getSchedulingAction"
     
@@ -15,7 +29,7 @@ def fetch_schedule_hearing_data():
         "isTotalCount": "Y"
     }
     
-    # Headers - YOU NEED TO PASTE YOUR BEARER TOKEN HERE
+    # Headers
     headers = {
         "Host": "gateway-officials.eci.gov.in",
         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:136.0) Gecko/20100101 Firefox/136.0",
@@ -24,7 +38,7 @@ def fetch_schedule_hearing_data():
         "Accept-Encoding": "gzip, deflate, br, zstd",
         "applicationName": "ERONET2.0",
         "PLATFORM-TYPE": "ECIWEB",
-        "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJDczJZLThBb3c2bEU4NW5xMnJuRE94bVpWTkRxYmpHUE5wLVNGdzQ3RjdzIn0.eyJleHAiOjE3Njg3ODA1MjIsImlhdCI6MTc2ODczNzMyMiwianRpIjoiNDAyNGY1ODUtNjliNi00MGNhLWFlNGUtNmI5NjQ5YTI4N2VkIiwiaXNzIjoiaHR0cDovLzEwLjIxMC4xMTMuMjE6ODA4MC9yZWFsbXMvZWNpLXByb2QtcmVhbG0iLCJhdWQiOlsicmVhbG0tbWFuYWdlbWVudCIsImFjY291bnQiXSwic3ViIjoiODhhNTQ1YzYtYzg1OS00MjVmLTk1ZjItYjhhNzE0NTQ1MGIxIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYXV0aG4tY2xpZW50Iiwic2Vzc2lvbl9zdGF0ZSI6IjJjYzhjZmY1LWY4MWYtNDNkYS1iNDgwLTU2MGJjMjdhOGM4OSIsImFjciI6IjEiLCJhbGxvd2VkLW9yaWdpbnMiOlsiIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIiwiYWVybyIsImRlZmF1bHQtcm9sZXMtZWNpLXByb2QtcmVhbG0iXX0sInJlc291cmNlX2FjY2VzcyI6eyJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbImltcGVyc29uYXRpb24iXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicHJvZmlsZSBlbWFpbCIsInNpZCI6IjJjYzhjZmY1LWY4MWYtNDNkYS1iNDgwLTU2MGJjMjdhOGM4OSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiYXV0aG9yaXplZFN0YXRlcyI6WyJTMjUiXSwicm9sZUlkIjo5LCJhdXRob3JpemVkRGlzdHJpY3RzIjpbIlMyNTIwIl0sImVtYWlsSWQiOiJzYWRhcnVyYWJhbjFjaXJjbGVAZ21haWwuY29tIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiZmJhOTFlNzktOTdmNS00MTM5LTk5MWMtMmNhMGZlNDA4MDgyIiwiYXV0aG9yaXplZEFjcyI6WzI2MF0sImdpdmVuX25hbWUiOiJTYXRhYmRpIiwibG9naW5OYW1lIjoiQUVST1MyNUEyNjBOMjAiLCJuYW1lIjoiU2F0YWJkaSBEdXR0YSIsInBob25lX251bWJlciI6IjkxNjM0OTE2NjUiLCJmYW1pbHlfbmFtZSI6IkR1dHRhIiwiYXV0aG9yaXplZFBhcnRzIjpbMTY3LDg3LDcsMjA5LDksODYsMjE2LDIxNCwyMTcsMTYzLDg5LDE2NiwxMTksMjA2LDg4LDE2NCwxNjUsMjEwLDEwLDIxMiwyMTEsMTIwLDE2MCwyMTMsMTYyLDEyMywyMDcsMjE1LDE2OCwxNjEsMjA4LDgsMTIxXX0.dN602ZRHYHMjFjFBjh2nRt6YCa8jwppjlpavK_gyXmF0s5nkU71-EX06Z6JAFdWkL_jUUphJ_VqvQy0geHQdYdZLAjdT_L64BiDf4wTm1bTOL2AdbgilQB4a8DG4DJOWEVj9NC9JJIl5NG4CZ2q3bGUicKueexJm5n61uBw-XDxcZkg1gdpBkvUWtl2ruIL8soECk_SixJ1CPIUqHhhM-TcbHrzMHmNcnLgs3MptU9LB45DuHlmpDeOPQD_SHY2L4S9fiPZvmkAOcxMhaRVZyH3M7MHTKyi_fDG4sSPgGEr2lvOn4jjimAR6W-_3XKM3yiAhjHnTXGtkzIk0gi1yUg",  # REPLACE WITH YOUR TOKEN
+        "Authorization": f"Bearer {bearer_token}",  # Use token from environment
         "currentRole": "aero",
         "state": "S25",
         "appName": "ERONET2.0",
@@ -39,57 +53,87 @@ def fetch_schedule_hearing_data():
         "Priority": "u=0"
     }
     
+    print(f"📅 Starting data fetch at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"🔗 API URL: {url}")
+    
     try:
         # Make the GET request
-        response = requests.get(url, headers=headers, params=params)
+        response = requests.get(url, headers=headers, params=params, timeout=30)
         
         # Check if request was successful
         if response.status_code == 200:
             # Parse JSON response
             data = response.json()
             
-            # Print the response in a readable format
-            print("API Request Successful!")
-            print(f"Status Code: {response.status_code}")
-            print("\nResponse Data:")
-            print(json.dumps(data, indent=2))
+            print("✅ API Request Successful!")
+            print(f"📊 Status Code: {response.status_code}")
             
-            # You can also save to a file
-            with open('schedule_hearing_data.json', 'w') as f:
+            # Generate filename with timestamp
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"schedule_data_{timestamp}.json"
+            
+            # Save to file
+            with open(filename, 'w') as f:
                 json.dump(data, f, indent=2)
-            print("\nData has been saved to 'schedule_hearing_data.json'")
+            
+            print(f"💾 Data saved to: {filename}")
+            
+            # Print summary if available
+            if isinstance(data, dict):
+                print("\n📋 Response Summary:")
+                for key, value in data.items():
+                    if isinstance(value, (str, int, float, bool)):
+                        print(f"   {key}: {value}")
+                    elif isinstance(value, list):
+                        print(f"   {key}: List with {len(value)} items")
+                    elif isinstance(value, dict):
+                        print(f"   {key}: Dictionary with {len(value)} keys")
             
             return data
+            
         else:
-            print(f"Request failed with status code: {response.status_code}")
-            print(f"Response: {response.text}")
+            print(f"❌ Request failed with status code: {response.status_code}")
+            print(f"Response: {response.text[:500]}...")  # Show first 500 chars
+            
+            # Save error response for debugging
+            error_filename = f"error_response_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            try:
+                error_data = response.json()
+                with open(error_filename, 'w') as f:
+                    json.dump(error_data, f, indent=2)
+                print(f"💾 Error response saved to: {error_filename}")
+            except:
+                with open(error_filename, 'w') as f:
+                    f.write(response.text)
+                print(f"💾 Error response saved to: {error_filename}")
+            
             return None
             
     except requests.exceptions.RequestException as e:
-        print(f"An error occurred: {e}")
+        print(f"❌ Network/Request error occurred: {e}")
         return None
     except json.JSONDecodeError as e:
-        print(f"Failed to parse JSON response: {e}")
-        print(f"Raw response: {response.text}")
+        print(f"❌ Failed to parse JSON response: {e}")
+        print(f"Raw response (first 1000 chars): {response.text[:1000]}")
+        return None
+    except Exception as e:
+        print(f"❌ Unexpected error: {e}")
         return None
 
-if __name__ == "__main__":
-    # Instructions for the user
+def main():
+    """Main function"""
     print("=" * 60)
     print("ECI Schedule Hearing API Fetcher")
     print("=" * 60)
-    print("\nIMPORTANT: You need to paste your bearer token in the script.")
-    print("1. Open the script in a text editor")
-    print("2. Find the line: 'Authorization': 'Bearer YOUR_BEARER_TOKEN_HERE'")
-    print("3. Replace 'YOUR_BEARER_TOKEN_HERE' with your actual bearer token")
-    print("4. Save the file and run it again")
-    print("=" * 60)
     
-    # Check if token is still the placeholder
-    import inspect
-    source = inspect.getsource(fetch_schedule_hearing_data)
-    if "YOUR_BEARER_TOKEN_HERE" in source:
-        print("\n✗ Token not updated yet. Please update the bearer token as instructed above.")
+    data = fetch_schedule_hearing_data()
+    
+    if data:
+        print("\n✅ Data fetch completed successfully!")
     else:
-        print("\n✓ Fetching data...")
-        fetch_schedule_hearing_data()
+        print("\n❌ Data fetch failed. Check the errors above.")
+    
+    print("=" * 60)
+
+if __name__ == "__main__":
+    main()
